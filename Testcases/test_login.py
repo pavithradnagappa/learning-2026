@@ -4,11 +4,25 @@ from Pages.logout_page import LogOut
 # from .test_data import LOGIN_DATA   # now reading same data from json file
 import pytest
 import json
+from pathlib import Path
 
-with open("test_data.json") as file:
+with (Path(__file__).parent / "test_data.json").open(encoding="utf-8") as file:
     LOGIN_DATA = json.load(file)
 
-@pytest.mark.parametrize("username, password,expected_result", LOGIN_DATA)
+@pytest.mark.smoke
+@pytest.mark.login
+@pytest.mark.parametrize(
+    "username, password, expected_result",
+    [
+        (
+            data["username"],
+            data["password"],
+            data["expected_result"]
+        )
+        for data in LOGIN_DATA
+    ]
+)
+
 def test_valid_login(page,username,password,expected_result):
 
 #creating object for LoginPage and inventory etc..(for the Pages classes)
@@ -32,7 +46,7 @@ def test_valid_login(page,username,password,expected_result):
     logout.Hamberger_menu()
     logout.Logout()
 
-    assert logout.verify_homepage()=="Swag Labs"
+    assert logout.verify_homepage()== expected_result
 
 
 
