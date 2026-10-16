@@ -9,23 +9,29 @@ def pytest_addoption(parser):
         default="chromium",
         help="Browser to run tests: chromium, firefox, or webkit"
     )
+    parser.addoption(
+        "--headed",
+        action="store_true",
+        help="Run the browser with a visible window"
+    )
 
 
 @pytest.fixture(scope="module")
 def page(request):
 
     browser_name = request.config.getoption("--browser")
+    headless = not request.config.getoption("--headed")
 
     with sync_playwright() as p:
 
         if browser_name == "chromium":
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=headless)
 
         elif browser_name == "firefox":
-            browser = p.firefox.launch(headless=True)
+            browser = p.firefox.launch(headless=headless)
 
         elif browser_name == "webkit":
-            browser = p.webkit.launch(headless=True)
+            browser = p.webkit.launch(headless=headless)
 
         else:
             raise ValueError(
@@ -56,4 +62,3 @@ def pytest_runtest_makereport(item, call):
     rep = outcome.get_result()
 
     setattr(item, "rep_" + rep.when, rep)
-
