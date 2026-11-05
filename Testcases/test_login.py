@@ -22,31 +22,26 @@ with (Path(__file__).parent / "test_data.json").open(encoding="utf-8") as file:
         for data in LOGIN_DATA
     ]
 )
+def test_valid_login(page, username, password, expected_result):
+    # FIX: valid and invalid login paths must be validated differently.
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
+    logout = LogOut(page)
 
-def test_valid_login(page,username,password,expected_result):
-
-#creating object for LoginPage and inventory etc..(for the Pages classes)
-    login=LoginPage(page)
-    # inventory=InventoryPage(page)
-    logout=LogOut(page)
-
-#launch website
     login.launch_application()
-
-#login
     login.login(username, password)
 
-    # inventory.add_backpack_to_cart()
-    # inventory.open_cart()
-
-#validation
-    # assert inventory.verify_product_pagetitle()=="Your Cart"
-
-#logout
-    logout.Hamberger_menu()
-    logout.Logout()
-
-    assert logout.verify_homepage()== expected_result
+    if expected_result == "Success":
+        # FIX: after valid login, check the inventory page instead of the login logo.
+        assert inventory.verify_product_pagetitle() == "Products"
+        logout.Hamberger_menu()
+        logout.Logout()
+        assert logout.verify_homepage() == "Swag Labs"
+    else:
+        # FIX: invalid login should not try to open the hamburger menu.
+        error_message = page.locator("[data-test='error']")
+        assert error_message.is_visible()
+        assert "Username and password do not match any user in this service" in error_message.text_content()
 
 
 
